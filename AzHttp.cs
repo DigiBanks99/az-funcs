@@ -1,22 +1,19 @@
 using System.Net;
-using System.Runtime.CompilerServices;
+using MediatR;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AzFuncs;
 
 public class AzHttp
 {
-    private readonly IConfiguration _config;
-    private readonly HelloCommandHandler _handler;
+    private readonly IMediator _mediator;
     private readonly ILogger _logger;
 
-    public AzHttp(ILoggerFactory loggerFactory, IConfiguration config, HelloCommandHandler handler)
+    public AzHttp(ILoggerFactory loggerFactory, IMediator mediator)
     {
-        _config = config;
-        _handler = handler;
+        _mediator = mediator;
         _logger = loggerFactory.CreateLogger<AzHttp>();
     }
 
@@ -39,8 +36,9 @@ public class AzHttp
         HttpResponseData response = req.CreateResponse(HttpStatusCode.OK);
         response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
 
-        string message = await _handler.HandleAsync(name, cancellationToken).ConfigureAwait(false);
-        await response.WriteStringAsync(message).ConfigureAwait(false);
+        HelloMessage helloMessage = new(name);
+        string helloResponse = await _mediator.Send(helloMessage, cancellationToken).ConfigureAwait(false);
+        await response.WriteStringAsync(helloResponse).ConfigureAwait(false);
 
         return response;
     }
