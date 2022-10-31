@@ -37,7 +37,7 @@ public class AzHttp
         response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
 
         HelloMessage helloMessage = new(name);
-        string helloResponse = await _mediator.Send(helloMessage, cancellationToken).ConfigureAwait(false);
+        string helloResponse = await _mediator.SendAsync(helloMessage, cancellationToken).ConfigureAwait(false);
         await response.WriteStringAsync(helloResponse).ConfigureAwait(false);
 
         return response;

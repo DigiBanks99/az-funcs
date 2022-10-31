@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzFuncs", "AzFuncs.csproj", "{D1DAA246-999C-4A34-82DC-CED2366EEEBF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzFuncs", "AzFuncs\AzFuncs.csproj", "{D1DAA246-999C-4A34-82DC-CED2366EEEBF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageQueuer", "MessageQueuer\MessageQueuer.csproj", "{557676BF-75EA-4A6D-AADF-828CED7D8028}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +20,9 @@ Global
 		{D1DAA246-999C-4A34-82DC-CED2366EEEBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1DAA246-999C-4A34-82DC-CED2366EEEBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1DAA246-999C-4A34-82DC-CED2366EEEBF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{557676BF-75EA-4A6D-AADF-828CED7D8028}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{557676BF-75EA-4A6D-AADF-828CED7D8028}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{557676BF-75EA-4A6D-AADF-828CED7D8028}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{557676BF-75EA-4A6D-AADF-828CED7D8028}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
