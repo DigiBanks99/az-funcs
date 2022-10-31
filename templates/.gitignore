@@ -1,0 +1,2 @@
+# exclude local parameter values
+*.parameters.json

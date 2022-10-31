@@ -7,6 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzFuncs", "AzFuncs\AzFuncs.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageQueuer", "MessageQueuer\MessageQueuer.csproj", "{557676BF-75EA-4A6D-AADF-828CED7D8028}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{E3975DAB-6799-4670-876D-5FC1D96784F2}"
+	ProjectSection(SolutionItems) = preProject
+		templates\service-bus.bicep = templates\service-bus.bicep
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
