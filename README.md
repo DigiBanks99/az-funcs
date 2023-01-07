@@ -16,8 +16,8 @@ Once you've got a Concierge Subscription going, deploy the infrastructure as fol
 
 1. Open VS Code or a tool that can use Bicep
 2. Ensure the [Bicep Extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-bicep) is installed
-3. Deploy the [Service Bus template](templates/service-bus.bicep)
-4. Next deploy the [Functions template](templates/functions.bicep)
+3. Deploy the [Service Bus](infra/service-bus.bicep)
+4. Next deploy the [Functions](infra/functions.bicep)
 5. Once deployment is complete you can deploy the AzFuncs project using Visual Studio, Rider or VS Code
 
 You can test the HTTP trigger by going to <https://yourfuncname.azurewebsites.net/api/HttpTrigger?name=somename&code=theauthcodeobtainablefromazureportal>

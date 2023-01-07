@@ -3,13 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzFuncs", "AzFuncs\AzFuncs.csproj", "{D1DAA246-999C-4A34-82DC-CED2366EEEBF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzFuncs", "src\AzFuncs\AzFuncs.csproj", "{D1DAA246-999C-4A34-82DC-CED2366EEEBF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageQueuer", "MessageQueuer\MessageQueuer.csproj", "{557676BF-75EA-4A6D-AADF-828CED7D8028}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageQueuer", "src\MessageQueuer\MessageQueuer.csproj", "{557676BF-75EA-4A6D-AADF-828CED7D8028}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{E3975DAB-6799-4670-876D-5FC1D96784F2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "infra", "infra", "{E3975DAB-6799-4670-876D-5FC1D96784F2}"
 	ProjectSection(SolutionItems) = preProject
-		templates\service-bus.bicep = templates\service-bus.bicep
+		infra\functions.bicep = infra\functions.bicep
+		infra\service-bus.bicep = infra\service-bus.bicep
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0DF1D948-CF8A-459A-B7BC-9FF44DD0F2D4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{20A41617-3918-45B5-85CA-D1C2E1FE7FFC}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global
@@ -29,5 +37,9 @@ Global
 		{557676BF-75EA-4A6D-AADF-828CED7D8028}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{557676BF-75EA-4A6D-AADF-828CED7D8028}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{557676BF-75EA-4A6D-AADF-828CED7D8028}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D1DAA246-999C-4A34-82DC-CED2366EEEBF} = {0DF1D948-CF8A-459A-B7BC-9FF44DD0F2D4}
+		{557676BF-75EA-4A6D-AADF-828CED7D8028} = {0DF1D948-CF8A-459A-B7BC-9FF44DD0F2D4}
 	EndGlobalSection
 EndGlobal
