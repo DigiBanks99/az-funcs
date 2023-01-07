@@ -1,0 +1,81 @@
+name: Create Infra
+on:
+  workflow_dispatch:
+    inputs:
+      AZURE_REGION:
+        description: "Azure Region to deploy Azure resources"
+        required: true
+        default: "azure-region"
+      RESOURCE_GROUP_NAME:
+        description: "Resource Group to deploy Azure resources"
+        required: true
+        default: "resource-group"
+      FUNCTION_NAME:
+        description: "The name of the Azure Function"
+        required: true
+        default: "myFunc"
+      PLAN_NAME:
+        description: "The name of the App Service Plan that will host the Azure Function"
+        required: true
+        default: "myAppPlan"
+      SERVICE_BUS_NAMESPACE:
+        description: "The name of the Service Bus to be deployed"
+        required: true
+        default: "myServiceBus"
+      STORAGE_ACCOUNT_NAME:
+        description: "The name of the Storage Account backing the Azure Function"
+        required: true
+        default: "saMyFunc"
+
+env:
+  AZURE_REGION: ${{ github.event.inputs.AZURE_REGION }}
+  RESOURCE_GROUP_NAME: ${{ github.event.inputs.RESOURCE_GROUP_NAME }}
+  FUNCTION_NAME: ${{ github.event.inputs.FUNCTION_NAME }}
+  PLAN_NAME: ${{ github.event.inputs.PLAN_NAME }}
+  SERVICE_BUS_NAMESPACE: ${{ github.event.inputs.SERVICE_BUS_NAMESPACE }}
+  STORAGE_ACCOUNT_NAME: ${{ github.event.inputs.STORAGE_ACCOUNT_NAME }}
+  BICEP_FILE_PATH: "infra"
+  BICEP_FILE_NAME: "main"
+
+jobs:
+  validate_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Authentication
+      # Set up the following secrets in your repository: AZURE_CREDENTIALS
+      # For details on usage of secrets, please refer https://help.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Checkout
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      # Build ARM Template from Bicep and create a target Azure resource group
+      - name: Azure CLI - Validate Bicep file ${{ env.BICEP_FILE_PATH }}/${{ env.BICEP_FILE_NAME }}.bicep
+        uses: Azure/cli@v1.0.7
+        with:
+          # Specify the script here
+          inlineScript: |
+            az group create --location ${{ env.AZURE_REGION }} --name ${{ env.RESOURCE_GROUP_NAME }}
+            az deployment group validate -g ${{ env.RESOURCE_GROUP_NAME }} --template-file ./${{ env.BICEP_FILE_PATH }}/${{ env.BICEP_FILE_NAME }}.bicep --parameters location=${{ env.AZURE_REGION }} sbName=${{ env.SERVICE_BUS_NAMESPACE }} functionName=${{ env.FUNCTION_NAME }} planName=${{ env.PLAN_NAME }} storageAccountName=${{ env.STORAGE_ACCOUNT_NAME }}
+            az bicep upgrade
+            az bicep build --file ./${{ env.BICEP_FILE_PATH }}/${{ env.BICEP_FILE_NAME }}.bicep
+
+      # Deployment Bicep template
+      - name: Deploy infrastructure to ${{ env.RESOURCE_GROUP_NAME }}
+        id: infraDeployment
+        uses: azure/arm-deploy@v1
+        with:
+          deploymentName: ${{ github.run_number }}
+          resourceGroupName: ${{ env.RESOURCE_GROUP_NAME }}
+          template: ./${{ env.BICEP_FILE_PATH }}/${{ env.BICEP_FILE_NAME }}.json # Set this to the location of your template file
+          parameters: location=${{ env.AZURE_REGION }} sbName=${{ env.SERVICE_BUS_NAMESPACE }} functionName=${{ env.FUNCTION_NAME }} planName=${{ env.PLAN_NAME }} storageAccountName=${{ env.STORAGE_ACCOUNT_NAME }}
+
+      # Azure logout
+      - name: logout
+        run: |
+          az logout
+        if: always()

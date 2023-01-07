@@ -1,12 +1,22 @@
 {
     "version": "2.0",
+    "extensions": {
+        "serviceBus": {
+            "clientRetryOptions": {
+                "maxRetries": 3
+            }
+        }
+    },
+    "functions": [],
     "logging": {
         "applicationInsights": {
             "samplingSettings": {
                 "isEnabled": true,
                 "excludedTypes": "Request"
             }
+        },
+        "console": {
+            "isEnabled": true
         }
-    },
-    "functions": ["HelloTrigger", "ServiceBusTrigger"]
+    }
 }

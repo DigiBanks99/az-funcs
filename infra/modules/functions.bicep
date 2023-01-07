@@ -1,14 +1,20 @@
-@allowed([
-  'centralus'
-  'West US'
-])
-param location string = 'centralus'
-param functionsName string = 'fn-azurefuncs'
-param planName string = 'plan-azurefuncs'
-param saName string = 'saazurefuncs'
+@description('The Azure region into which the Service Bus is to be deployed')
+param location string
+
+@description('The name of the Azure Function')
+param functionName string
+
+@description('The name of the App Service Plan that will host the Azure Function')
+param planName string
+
+@description('The name of the Storage Account backing the Azure Function')
+param storageAccountName string
+
+@description('The Fully Qualified name of the Azure Service Bus Namespace')
+param serviceBusFqName string
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
-  name: saName
+  name: storageAccountName
   location: location
   sku: {
     name: 'Standard_LRS'
@@ -134,19 +140,19 @@ resource servicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
 }
 
 resource functions 'Microsoft.Web/sites@2022-03-01' = {
-  name: functionsName
+  name: functionName
   location: location
   kind: 'functionapp,linux'
   properties: {
     enabled: true
     hostNameSslStates: [
       {
-        name: '${functionsName}.azurewebsite.net'
+        name: '${functionName}.azurewebsite.net'
         sslState: 'Disabled'
         hostType: 'Standard'
       }
       {
-        name: '${functionsName}.scm.azurewebsite.net'
+        name: '${functionName}.scm.azurewebsite.net'
         sslState: 'Disabled'
         hostType: 'Repository'
       }
@@ -178,17 +184,13 @@ resource funcsConfig 'Microsoft.Web/sites/config@2022-03-01' = {
   parent: functions
   properties: {
     numberOfWorkers: 1
-    defaultDocuments: [
-      'Default.htm'
-      'Default.html'
-      'Default.asp'
-      'index.htm'
-      'index.html'
-      'iisstart.htm'
-      'default.aspx'
-      'index.php'
-    ]
     netFrameworkVersion: 'v4.0'
     linuxFxVersion: 'DOTNET-ISOLATED|6.0'
+    appSettings: [
+      {
+        name: 'ServiceBusConnection__fullyQualifiedName'
+        value: serviceBusFqName
+      }
+    ]
   }
 }

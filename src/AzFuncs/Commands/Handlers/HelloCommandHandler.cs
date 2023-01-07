@@ -1,16 +1,8 @@
-﻿using MediatR;
+﻿using AzFuncs.Commands.Messages;
+using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace AzFuncs;
-
-public class HelloMessage : IRequest<string>
-{
-    public HelloMessage(string name)
-    {
-        Name = name;
-    }
-    public string Name { get; }
-}
+namespace AzFuncs.Commands.Handlers;
 
 public class HelloCommandHandler : IRequestHandler<HelloMessage, string>
 {

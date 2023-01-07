@@ -1,0 +1,461 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.13.1.58284",
+      "templateHash": "11852177607567960567"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "The Azure region into which the Service Bus is to be deployed"
+      },
+      "allowedValues": [
+        "West US",
+        "centralus",
+        "southafricanorth"
+      ]
+    },
+    "sbName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Service Bus to be deployed"
+      }
+    },
+    "functionName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Azure Function"
+      }
+    },
+    "planName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the App Service Plan that will host the Azure Function"
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Storage Account backing the Azure Function"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[parameters('sbName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "sbName": {
+            "value": "[parameters('sbName')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.13.1.58284",
+              "templateHash": "17935856995417090590"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "The Azure region into which the Service Bus is to be deployed"
+              }
+            },
+            "sbName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the Service Bus to be deployed"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ServiceBus/namespaces",
+              "apiVersion": "2022-01-01-preview",
+              "name": "[parameters('sbName')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Basic",
+                "tier": "Basic"
+              },
+              "properties": {
+                "publicNetworkAccess": "Enabled",
+                "disableLocalAuth": true,
+                "zoneRedundant": false
+              }
+            },
+            {
+              "type": "Microsoft.ServiceBus/namespaces/AuthorizationRules",
+              "apiVersion": "2022-01-01-preview",
+              "name": "[format('{0}/{1}', parameters('sbName'), 'RootManageSharedAccessKey')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces', parameters('sbName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.ServiceBus/namespaces/networkRuleSets",
+              "apiVersion": "2022-01-01-preview",
+              "name": "[format('{0}/{1}', parameters('sbName'), 'default')]",
+              "properties": {
+                "publicNetworkAccess": "Enabled",
+                "defaultAction": "Allow"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces', parameters('sbName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.ServiceBus/namespaces/queues",
+              "apiVersion": "2022-01-01-preview",
+              "name": "[format('{0}/{1}', parameters('sbName'), 'devQueue')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces', parameters('sbName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.ServiceBus/namespaces/queues",
+              "apiVersion": "2022-01-01-preview",
+              "name": "[format('{0}/{1}', parameters('sbName'), 'queue')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces', parameters('sbName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.ServiceBus/namespaces/queues",
+              "apiVersion": "2022-01-01-preview",
+              "name": "[format('{0}/{1}', parameters('sbName'), 'outputQueue')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces', parameters('sbName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "serviceBusFullyQualifiedName": {
+              "type": "string",
+              "value": "[format('{0}.servicebus.windows.net', reference(resourceId('Microsoft.ServiceBus/namespaces', parameters('sbName')), '2022-01-01-preview').serviceBusEndpoint)]",
+              "metadata": {
+                "description": "The fully qualified name of the Service Bus Namespace"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[parameters('functionName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "functionName": {
+            "value": "[parameters('functionName')]"
+          },
+          "planName": {
+            "value": "[parameters('planName')]"
+          },
+          "storageAccountName": {
+            "value": "[parameters('storageAccountName')]"
+          },
+          "serviceBusFqName": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('sbName')), '2020-10-01').outputs.serviceBusFullyQualifiedName.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.13.1.58284",
+              "templateHash": "15902837228667602542"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "The Azure region into which the Service Bus is to be deployed"
+              }
+            },
+            "functionName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the Azure Function"
+              }
+            },
+            "planName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the App Service Plan that will host the Azure Function"
+              }
+            },
+            "storageAccountName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the Storage Account backing the Azure Function"
+              }
+            },
+            "serviceBusFqName": {
+              "type": "string",
+              "metadata": {
+                "description": "The Fully Qualified name of the Azure Service Bus Namespace"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Storage/storageAccounts",
+              "apiVersion": "2022-05-01",
+              "name": "[parameters('storageAccountName')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "kind": "Storage",
+              "properties": {
+                "minimumTlsVersion": "TLS1_2",
+                "allowBlobPublicAccess": true,
+                "networkAcls": {
+                  "bypass": "AzureServices",
+                  "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                  "services": {
+                    "file": {
+                      "keyType": "Account",
+                      "enabled": true
+                    },
+                    "blob": {
+                      "keyType": "Account",
+                      "enabled": true
+                    }
+                  },
+                  "keySource": "Microsoft.Storage"
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts/fileServices",
+              "apiVersion": "2022-05-01",
+              "name": "[format('{0}/{1}', parameters('storageAccountName'), 'default')]",
+              "properties": {
+                "shareDeleteRetentionPolicy": {
+                  "enabled": true,
+                  "days": 7
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts/queueServices",
+              "apiVersion": "2022-05-01",
+              "name": "[format('{0}/{1}', parameters('storageAccountName'), 'default')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts/tableServices",
+              "apiVersion": "2022-05-01",
+              "name": "[format('{0}/{1}', parameters('storageAccountName'), 'default')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts/blobServices",
+              "apiVersion": "2022-05-01",
+              "name": "[format('{0}/{1}', parameters('storageAccountName'), 'default')]",
+              "properties": {
+                "deleteRetentionPolicy": {
+                  "allowPermanentDelete": false,
+                  "enabled": false
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+              "apiVersion": "2022-05-01",
+              "name": "[format('{0}/{1}/{2}', parameters('storageAccountName'), 'default', 'azure-webjobs-hosts')]",
+              "properties": {
+                "immutableStorageWithVersioning": {
+                  "enabled": false
+                },
+                "defaultEncryptionScope": "$account-encryption-key",
+                "denyEncryptionScopeOverride": false,
+                "publicAccess": "None"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountName'), 'default')]"
+              ]
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+              "apiVersion": "2022-05-01",
+              "name": "[format('{0}/{1}/{2}', parameters('storageAccountName'), 'default', 'azure-webjobs-secrets')]",
+              "properties": {
+                "immutableStorageWithVersioning": {
+                  "enabled": false
+                },
+                "defaultEncryptionScope": "$account-encryption-key",
+                "denyEncryptionScopeOverride": false,
+                "publicAccess": "None"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountName'), 'default')]"
+              ]
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+              "apiVersion": "2022-05-01",
+              "name": "[format('{0}/{1}/{2}', parameters('storageAccountName'), 'default', 'scm-releases')]",
+              "properties": {
+                "immutableStorageWithVersioning": {
+                  "enabled": false
+                },
+                "defaultEncryptionScope": "$account-encryption-key",
+                "denyEncryptionScopeOverride": false,
+                "publicAccess": "None"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountName'), 'default')]"
+              ]
+            },
+            {
+              "type": "Microsoft.Web/serverfarms",
+              "apiVersion": "2022-03-01",
+              "name": "[parameters('planName')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Y1",
+                "tier": "Dynamic",
+                "size": "Y1",
+                "family": "Y"
+              },
+              "kind": "functionapp",
+              "properties": {
+                "perSiteScaling": false,
+                "elasticScaleEnabled": false,
+                "maximumElasticWorkerCount": 1,
+                "isSpot": false,
+                "reserved": true,
+                "isXenon": false,
+                "hyperV": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0,
+                "zoneRedundant": false
+              }
+            },
+            {
+              "type": "Microsoft.Web/sites",
+              "apiVersion": "2022-03-01",
+              "name": "[parameters('functionName')]",
+              "location": "[parameters('location')]",
+              "kind": "functionapp,linux",
+              "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                  {
+                    "name": "[format('{0}.azurewebsite.net', parameters('functionName'))]",
+                    "sslState": "Disabled",
+                    "hostType": "Standard"
+                  },
+                  {
+                    "name": "[format('{0}.scm.azurewebsite.net', parameters('functionName'))]",
+                    "sslState": "Disabled",
+                    "hostType": "Repository"
+                  }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('planName'))]",
+                "vnetRouteAllEnabled": false,
+                "vnetImagePullEnabled": false,
+                "vnetContentShareEnabled": false,
+                "siteConfig": {
+                  "numberOfWorkers": 1,
+                  "linuxFxVersion": "DOTNET-ISOLATED|6.0",
+                  "acrUseManagedIdentityCreds": false,
+                  "alwaysOn": false,
+                  "http20Enabled": false,
+                  "functionAppScaleLimit": 200,
+                  "minimumElasticInstanceCount": 0
+                },
+                "clientAffinityEnabled": false,
+                "clientCertEnabled": false,
+                "clientCertMode": "Required",
+                "hostNamesDisabled": false,
+                "httpsOnly": true,
+                "storageAccountRequired": false
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('planName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Web/sites/config",
+              "apiVersion": "2022-03-01",
+              "name": "[format('{0}/{1}', parameters('functionName'), 'web')]",
+              "properties": {
+                "numberOfWorkers": 1,
+                "netFrameworkVersion": "v4.0",
+                "linuxFxVersion": "DOTNET-ISOLATED|6.0",
+                "appSettings": [
+                  {
+                    "name": "ServiceBusConnection__fullyQualifiedName",
+                    "value": "[parameters('serviceBusFqName')]"
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('functionName'))]"
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', parameters('sbName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "serviceBusFullyQualifiedName": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Resources/deployments', parameters('sbName')), '2020-10-01').outputs.serviceBusFullyQualifiedName.value]",
+      "metadata": {
+        "description": "The fully qualified name of the Service Bus Namespace"
+      }
+    }
+  }
+}
