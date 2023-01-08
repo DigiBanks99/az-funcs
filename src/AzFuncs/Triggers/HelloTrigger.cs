@@ -7,19 +7,19 @@ using Microsoft.Extensions.Logging;
 
 namespace AzFuncs.Triggers;
 
-public class AzHttp
+public sealed class HelloTrigger
 {
     private readonly IMediator _mediator;
     private readonly ILogger _logger;
 
-    public AzHttp(ILoggerFactory loggerFactory, IMediator mediator)
+    public HelloTrigger(ILoggerFactory loggerFactory, IMediator mediator)
     {
         _mediator = mediator;
-        _logger = loggerFactory.CreateLogger<AzHttp>();
+        _logger = loggerFactory.CreateLogger<HelloTrigger>();
     }
 
     [Function(nameof(HelloTrigger))]
-    public async Task<HttpResponseData> HelloTrigger([HttpTrigger(AuthorizationLevel.Function,
+    public async Task<HttpResponseData> RunAsync([HttpTrigger(AuthorizationLevel.Function,
             "get",
             "post")]
         HttpRequestData req,

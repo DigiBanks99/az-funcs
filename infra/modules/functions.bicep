@@ -13,6 +13,12 @@ param storageAccountName string
 @description('The Fully Qualified name of the Azure Service Bus Namespace')
 param serviceBusFqName string
 
+var storageAccountRoleIds = [
+  'b7e6dc6d-f1e8-4753-8033-0f276bb0955b' // Storage Blob Data Owner
+  '17d1049b-9a84-46fb-8f53-869881c3d3ab' // Storage Account Contributor
+  '974c5e8b-45b9-4653-ba55-5f855dd0fb88' // Storage Queue Data Contributor
+]
+
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: storageAccountName
   location: location
@@ -22,7 +28,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   kind: 'Storage'
   properties: {
     minimumTlsVersion: 'TLS1_2'
-    allowBlobPublicAccess: true
+    allowBlobPublicAccess: false
     networkAcls: {
       bypass: 'AzureServices'
       defaultAction: 'Allow'
@@ -139,10 +145,13 @@ resource servicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   }
 }
 
-resource functions 'Microsoft.Web/sites@2022-03-01' = {
+resource function 'Microsoft.Web/sites@2022-03-01' = {
   name: functionName
   location: location
   kind: 'functionapp,linux'
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     enabled: true
     hostNameSslStates: [
@@ -181,16 +190,69 @@ resource functions 'Microsoft.Web/sites@2022-03-01' = {
 
 resource funcsConfig 'Microsoft.Web/sites/config@2022-03-01' = {
   name: 'web'
-  parent: functions
+  parent: function
   properties: {
     numberOfWorkers: 1
     netFrameworkVersion: 'v4.0'
     linuxFxVersion: 'DOTNET-ISOLATED|6.0'
     appSettings: [
       {
+        name: 'AzureWebJobsStorage__accountName'
+        value: storageAccountName
+      }
+      {
+        name: 'AzureWebJobsStorage__blobServiceUri'
+        value: 'https://${storageAccountName}.${storageAccount.properties.primaryEndpoints.blob}'
+      }
+      {
+        name: 'AzureWebJobsStorage__queueServiceUri'
+        value: 'https://${storageAccountName}.${storageAccount.properties.primaryEndpoints.queue}'
+      }
+      {
+        name: 'AzureWebJobsStorage__tableServiceUri'
+        value: 'https://${storageAccountName}.${storageAccount.properties.primaryEndpoints.table}'
+      }
+      {
+        name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+        value: 'false'
+      }
+      {
         name: 'ServiceBusConnection__fullyQualifiedName'
         value: serviceBusFqName
+      }
+      {
+        name: 'ServiceBusInboundQueue'
+        value: 'queue'
+      }
+      {
+        name: 'FUNCTIONS_EXTENSION_VERSION'
+        value: '~4'
+      }
+      {
+        name: 'FUNCTIONS_WORKER_RUNTIME'
+        value: 'dotnet-isolated'
+      }
+      {
+        name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
+        value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
+      }
+      {
+        name: 'WEBSITE_CONTENTSHARE'
+        value: toLower(functionName)
+      }
+      {
+        name: 'WEBSITE_RUN_FROM_PACKAGE'
+        value: '1'
       }
     ]
   }
 }
+
+resource storageAccountRoleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for roleId in storageAccountRoleIds: {
+  name: guid('role-${storageAccountName}-${roleId}')
+  scope: storageAccount
+  properties: {
+    principalId: function.identity.principalId
+    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', roleId)
+  }
+}]

@@ -38,7 +38,7 @@ env:
   BICEP_FILE_NAME: "main"
 
 jobs:
-  validate_and_deploy:
+  validate:
     runs-on: ubuntu-latest
     steps:
       # Authentication
@@ -64,14 +64,36 @@ jobs:
             az bicep upgrade
             az bicep build --file ./${{ env.BICEP_FILE_PATH }}/${{ env.BICEP_FILE_NAME }}.bicep
 
+      # Azure logout
+      - name: logout
+        run: |
+          az logout
+        if: always()
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      # Authentication
+      # Set up the following secrets in your repository: AZURE_CREDENTIALS
+      # For details on usage of secrets, please refer https://help.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Checkout
+      - name: Checkout
+        uses: actions/checkout@v1
+
       # Deployment Bicep template
       - name: Deploy infrastructure to ${{ env.RESOURCE_GROUP_NAME }}
         id: infraDeployment
         uses: azure/arm-deploy@v1
         with:
-          deploymentName: ${{ github.run_number }}
+          deploymentName: main-${{ github.run_number }}
           resourceGroupName: ${{ env.RESOURCE_GROUP_NAME }}
-          template: ./${{ env.BICEP_FILE_PATH }}/${{ env.BICEP_FILE_NAME }}.json # Set this to the location of your template file
+          template: ./${{ env.BICEP_FILE_PATH }}/${{ env.BICEP_FILE_NAME }}.bicep # Set this to the location of your template file
           parameters: location=${{ env.AZURE_REGION }} sbName=${{ env.SERVICE_BUS_NAMESPACE }} functionName=${{ env.FUNCTION_NAME }} planName=${{ env.PLAN_NAME }} storageAccountName=${{ env.STORAGE_ACCOUNT_NAME }}
 
       # Azure logout

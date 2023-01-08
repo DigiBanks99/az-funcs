@@ -5,18 +5,18 @@ using Microsoft.Extensions.Logging;
 
 namespace AzFuncs.Triggers;
 
-public class ServiceBusTriggerFunc
+public class ServiceBusTrigger
 {
     private readonly IMediator _mediator;
 
-    public ServiceBusTriggerFunc(IMediator mediator)
+    public ServiceBusTrigger(IMediator mediator)
     {
         _mediator = mediator;
     }
 
     [Function(nameof(ServiceBusTrigger))]
     [ServiceBusOutput("outputQueue", Connection = "ServiceBusConnection")]
-    public async Task<string> ServiceBusTrigger([ServiceBusTrigger("%ServiceBusInboundQueue%", Connection = "ServiceBusConnection")] string item,
+    public async Task<string> RunAsync([ServiceBusTrigger("%ServiceBusInboundQueue%", Connection = "ServiceBusConnection")] string item,
         FunctionContext context)
     {
         var logger = context.GetLogger("ServiceBusFunction");

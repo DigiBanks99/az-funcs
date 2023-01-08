@@ -1,6 +1,9 @@
 {
     "version": "2.0",
     "extensions": {
+        "http": {
+            "routePrefix": "api"
+        },
         "serviceBus": {
             "clientRetryOptions": {
                 "maxRetries": 3
