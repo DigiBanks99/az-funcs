@@ -18,6 +18,7 @@ resource serviceBus 'Microsoft.ServiceBus/namespaces@2022-01-01-preview' = {
   }
 }
 
+// For some reason not having this or removing `existing` causes deployment to fail
 resource authRuleRoot 'Microsoft.ServiceBus/namespaces/AuthorizationRules@2022-01-01-preview' existing = {
   name: 'RootManageSharedAccessKey'
   parent: serviceBus
@@ -48,4 +49,4 @@ resource queueOutputQueue 'Microsoft.ServiceBus/namespaces/queues@2022-01-01-pre
 }
 
 @description('The fully qualified name of the Service Bus Namespace')
-output serviceBusFullyQualifiedName string = '${serviceBus.properties.serviceBusEndpoint}.servicebus.windows.net'
+output serviceBusFullyQualifiedName string = '${sbName}.servicebus.windows.net'

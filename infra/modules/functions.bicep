@@ -191,6 +191,22 @@ resource funcsConfig 'Microsoft.Web/sites/config@2022-03-01' = {
         name: 'ServiceBusConnection__fullyQualifiedName'
         value: serviceBusFqName
       }
+      {
+        name: 'ServiceBusInboundQueue'
+        value: 'queue'
+      }
+      {
+        name: 'FUNCTIONS_EXTENSION_VERSION'
+        value: '~4'
+      }
+      {
+        name: 'FUNCTIONS_WORKER_RUNTIME'
+        value: 'dotnet-isolated'
+      }
+      {
+        name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+        value: 'false'
+      }
     ]
   }
 }
